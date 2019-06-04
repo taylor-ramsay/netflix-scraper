@@ -1,4 +1,4 @@
-# netflixScraper
+# Netflix Scraper
 
 Pulls in data from Netflix and OmDB API. Uses IMDBs rating system to find what's rated best on Netflix.
 
