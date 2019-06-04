@@ -1,10 +1,9 @@
-
 const puppeteer = require('puppeteer');
 const CREDS = require('./creds');
 const axios = require('axios')
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://localhost/nfScraperDB')
+mongoose.connect(CREDS.mongoURI, {useNewUrlParser: true})
 const db = mongoose.connection
 
 db.on('open', () => {
@@ -19,17 +18,19 @@ async function run() {
     });
     const page = await browser.newPage();
     // dom element selectors
-    const USERNAME_SELECTOR = '#email';
-    const PASSWORD_SELECTOR = '#password';
-    const BUTTON_SELECTOR = '#appMountPoint > div > div.login-body > div > div > form:nth-child(2) > button';
-    const WHOS_WATCHING_SELECTOR = CREDS.whosWatching;
+    const USERNAME_SELECTOR = '#id_userLoginId';
+    const PASSWORD_SELECTOR = '#id_password';
+    const BUTTON_SELECTOR = 'button.login-button';
     const MOVIE_TITLE_SELECTOR = '#title-card-ROW-COL > div > a > div > div > div'
     const MOVIE_IMG_SELECTOR = '#title-card-ROW-COL > div > a > div > img'
     const LIST_LENGTH_SELECTOR_CLASS = 'fallback-text'
     const ROW_LENGTH_SELECTOR_CLASS = 'rowContainer'
-    const GRID_VIEW_SELECTOR = '#appMountPoint > div > div > div > div.pinning-header > div > div.sub-header > div:nth-child(2) > div > div > div.aro-genre-details > div > div.aro-grid'
+    const GRID_VIEW_SELECTOR = 'div.aro-grid'
 
     const genreUrls = {
+        series: 'https://www.netflix.com/browse/genre/83',
+        films: 'https://www.netflix.com/browse/genre/34399',
+        new: 'https://www.netflix.com/browse/genre/1592210',
         actionAndAdverture: 'https://www.netflix.com/browse/genre/1365',
         anime: 'https://www.netflix.com/browse/genre/3063',
         canadian: 'https://www.netflix.com/browse/genre/56181?bc=34399',
@@ -54,7 +55,7 @@ async function run() {
 
     const omdbApi = `http://www.omdbapi.com/?apikey=${CREDS.omdbKey}`
 
-    await page.goto('https://www.netflix.com/ca/login');
+    await page.goto('https://www.netflix.com/fr/login');
 
     await page.click(USERNAME_SELECTOR);
     await page.keyboard.type(CREDS.username);
@@ -65,8 +66,8 @@ async function run() {
     await page.click(BUTTON_SELECTOR);
 
     await page.waitForNavigation();
-
-    await page.click(WHOS_WATCHING_SELECTOR);
+    
+    await page.click(`li.profile:nth-child(${CREDS.profileLocation})`);
 
     await page.waitForNavigation();
 
